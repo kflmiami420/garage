@@ -1,10 +1,10 @@
 const FauxMo = require('fauxmojs');
 const Gpio = require('onoff').Gpio;
-const relay = new Gpio(3, 'out');
+const relay = new Gpio(18, 'in', 'both');
 
-// relay.watch(function (err, value) {
-//   led.writeSync(value);
-// });
+relay.watch(function (err, value) {
+  console.log('relay watch ', err, value);
+});
 
 function handleAlexa(action) {
   console.log('garage action:', action);
