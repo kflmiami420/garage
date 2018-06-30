@@ -1,4 +1,5 @@
 {
+  "main": "garage.js",
   "dependencies": {
     "fauxmojs": "^1.0.3",
     "onoff": "^3.1.0"
