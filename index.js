@@ -1,6 +1,6 @@
 const FauxMo = require('fauxmojs');
 const Gpio = require('onoff').Gpio;
-const relay = new Gpio(18, 'in', 'both');
+const relay = new Gpio(18, 'both');
 
 relay.watch(function (err, value) {
   console.log('relay watch ', err, value);
@@ -8,8 +8,10 @@ relay.watch(function (err, value) {
 
 function handleAlexa(action) {
   console.log('garage action:', action);
-  const res = relay.writeSync(action);
-  console.log('relay res ', res);
+  switch(action) {
+    case 'on': relay.writeSync('out'); break;
+    case 'off': relay.writeSync('in'); break;
+  }
 }
 
 let fauxMo = new FauxMo(
