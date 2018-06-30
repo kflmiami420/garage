@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "fauxmojs": "^1.0.3"
+    "fauxmojs": "^1.0.3",
+    "onoff": "^3.1.0"
   }
 }
