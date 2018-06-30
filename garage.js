@@ -11,11 +11,10 @@ function handleAlexa(action) {
 }
 
 wemoConfig = {
-  // ipAddress: '192.168.1.203',
   devices: [
     {
       name: 'garage',
-      // port: 11000,
+      port: 11000,
       handler: (action) => handleAlexa(action),
     },
   ]
