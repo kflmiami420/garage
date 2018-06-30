@@ -1,4 +1,18 @@
 const FauxMo = require('fauxmojs');
+const Gpio = require('onoff').Gpio;
+const relay = new Gpio(18, 'out');
+
+relay.watch(function (err, value) {
+  console.log('relay watch ', err, value);
+});
+
+function handleAlexa(action) {
+  console.log('garage action:', action);
+  switch(action) {
+    case 'on': relay.writeSync(0); break;
+    case 'off': relay.writeSync(1); break;
+  }
+}
 
 let fauxMo = new FauxMo(
   {
@@ -7,9 +21,7 @@ let fauxMo = new FauxMo(
       {
         name: 'garage',
         port: 11000,
-        handler: (action) => {
-          console.log('garage action:', action);
-        }
+        handler: (action) => handleAlexa(action),
       },
     ]
   });
