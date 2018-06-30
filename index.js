@@ -9,8 +9,8 @@ relay.watch(function (err, value) {
 function handleAlexa(action) {
   console.log('garage action:', action);
   switch(action) {
-    case 'on': relay.writeSync(1); break;
-    case 'off': relay.writeSync(0); break;
+    case 'on': relay.writeSync(0); break;
+    case 'off': relay.writeSync(1); break;
   }
 }
 
