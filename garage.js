@@ -1,13 +1,7 @@
 const FauxMo = require('fauxmojs');
 const { format, createLogger, transports } = require('winston');
-
 // TODO: make this work on macOS
-try {
-  const { onoff } = require('onoff');
-  const Gpio = onoff.Gpio;
-} catch (e) {
-  function Gpio(pin, direction) {};
-}
+const Gpio = require('onoff').Gpio;
 
 const logger = createLogger({
   format: format.combine(
