@@ -20,13 +20,19 @@ const relay = new Gpio(18, 'out');
 
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
-  relay.writeSync(relay.readSync() ^ 1);
-  relay.writeSync(relay.readSync());
 
-  // switch(action) {
-  //   case 'on':
-  //   case 'off': relay.writeSync(0); relay.writeSync(1); break;
-  // }
+  switch(action) {
+    case 'on':
+      relay.write(0, () => {
+        relay.writeSync(1);
+      });
+      break;
+    case 'off':
+      relay.write(1, () => {
+        relay.writeSync(0);
+      });
+      break;
+  }
 }
 
 wemoConfig = {
