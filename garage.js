@@ -24,9 +24,19 @@ function handleAlexa(action) {
 
   switch(action) {
     case 'on':
-      relay.writeSync(0); break;
+      relay.writeSync(0);
+      if (garageStatus == 'closed') {
+        setTimeout(relay.writeSync(1), 1000);
+      }
+      garageStatus = 'opened';
+      break;
     case 'off':
-      relay.writeSync(1); break;
+      relay.writeSync(1);
+      if (garageStatus == 'opened') {
+        setTimeout(relay.writeSync(0), 1000);
+      }
+      garageStatus = 'closed';
+      break;
   }
 }
 
