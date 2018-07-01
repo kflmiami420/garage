@@ -1,5 +1,26 @@
 const FauxMo = require('fauxmojs');
-const Gpio = require('onoff').Gpio;
+const { format, createLogger, transports } = require('winston');
+
+// TODO: make this work on macOS
+try {
+  const { Gpio } = require('onoff');
+} catch (e) {
+  function Gpio(pin, direction) {};
+}
+
+const logger = createLogger({
+  format: format.combine(
+    format.timestamp({
+      format: 'YYYY-MM-DD HH:mm:ss'
+    }),
+    format.cli(),
+    format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+  ),
+  transports: [
+    new transports.Console()
+  ]
+});
+
 const relay = new Gpio(18, 'out');
 
 function handleAlexa(action) {
@@ -21,4 +42,4 @@ wemoConfig = {
 }
 
 new FauxMo(wemoConfig);
-console.log('garage-pi started..');
+logger.info('garage-pi started..')
