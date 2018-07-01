@@ -24,9 +24,6 @@ function handleAlexa(action) {
   let currVal = relay.readSync();
   logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
   relay.writeSync(currVal ^ 1);
-
-  currVal = relay.readSync();
-  logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
   relay.writeSync(currVal ^ 1);
 
   // switch(action) {
