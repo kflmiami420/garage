@@ -16,14 +16,16 @@ const logger = createLogger({
   ]
 });
 
-const relay = new Gpio(18, 'out');
+const relay = new Gpio(18, 'out', 'none', {debounceTimeout: 10, activeLow: true});
 
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
-  switch(action) {
-    case 'on': relay.writeSync(0); break;
-    case 'off': relay.writeSync(1); break;
-  }
+  relay.writeSync(relay.readSync() ^ 1); break;
+
+  // switch(action) {
+  //   case 'on':
+  //   case 'off': relay.writeSync(0); relay.writeSync(1); break;
+  // }
 }
 
 wemoConfig = {
@@ -38,3 +40,7 @@ wemoConfig = {
 
 new FauxMo(wemoConfig);
 logger.info('garage-pi started..')
+
+process.on('SIGINT', () => {
+  relay.unexport();
+});
