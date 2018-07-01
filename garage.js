@@ -2,6 +2,7 @@ const FauxMo = require('fauxmojs');
 const { format, createLogger, transports } = require('winston');
 // TODO: make this work on macOS
 const Gpio = require('onoff').Gpio;
+let garageStatus = 'closed';
 
 const logger = createLogger({
   format: format.combine(
@@ -16,22 +17,16 @@ const logger = createLogger({
   ]
 });
 
-const relay = new Gpio(18, 'out');
+const relay = new Gpio(18, 'low');
 
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
 
   switch(action) {
     case 'on':
-      relay.write(0, () => {
-        relay.writeSync(1);
-      });
-      break;
+      relay.write(1); break;
     case 'off':
-      relay.write(1, () => {
-        relay.writeSync(0);
-      });
-      break;
+      relay.write(0); break;
   }
 }
 
