@@ -20,11 +20,8 @@ const relay = new Gpio(18, 'out');
 
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
-
-  let currVal = relay.readSync();
-  logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
-  relay.writeSync(currVal ^ 1);
-  relay.writeSync(currVal ^ 1);
+  relay.writeSync(relay.readSync() ^ 1);
+  relay.writeSync(relay.readSync());
 
   // switch(action) {
   //   case 'on':
