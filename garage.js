@@ -3,7 +3,8 @@ const { format, createLogger, transports } = require('winston');
 
 // TODO: make this work on macOS
 try {
-  const { Gpio } = require('onoff');
+  const { onoff } = require('onoff');
+  const Gpio = onoff.Gpio;
 } catch (e) {
   function Gpio(pin, direction) {};
 }
