@@ -16,11 +16,18 @@ const logger = createLogger({
   ]
 });
 
-const relay = new Gpio(18, 'out', 'none', {debounceTimeout: 10, activeLow: true});
+const relay = new Gpio(18, 'low', 'both', {debounceTimeout: 10, activeLow: true});
 
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
-  relay.writeSync(relay.readSync() ^ 1);
+
+  const currVal = relay.readSync();
+  logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
+  relay.writeSync(currVal ^ 1);
+
+  const currVal = relay.readSync();
+  logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
+  relay.writeSync(currVal ^ 1);
 
   // switch(action) {
   //   case 'on':
