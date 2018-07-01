@@ -23,9 +23,11 @@ function handleAlexa(action) {
 
   switch(action) {
     case 'on':
-      relay.writeSync(0); break;
+      relay.write(0, () => setTimeout(() => relay.writeSync(1), 500));
+      break;
     case 'off':
-      relay.writeSync(1); break;
+      relay.write(1, () => setTimeout(() => relay.writeSync(0), 500));
+      break;
   }
 }
 
