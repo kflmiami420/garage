@@ -16,7 +16,7 @@ const logger = createLogger({
   ]
 });
 
-const relay = new Gpio(18, 'low', 'both', {debounceTimeout: 10, activeLow: true});
+const relay = new Gpio(18, 'out');
 
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
