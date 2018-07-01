@@ -21,11 +21,11 @@ const relay = new Gpio(18, 'low', 'both', {debounceTimeout: 10, activeLow: true}
 function handleAlexa(action) {
   logger.info(`garage action: ${action}`);
 
-  const currVal = relay.readSync();
+  let currVal = relay.readSync();
   logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
   relay.writeSync(currVal ^ 1);
 
-  const currVal = relay.readSync();
+  currVal = relay.readSync();
   logger.info(`relay.readSync(): ${currVal}, writting: ${currVal ^ 1}`);
   relay.writeSync(currVal ^ 1);
 
