@@ -40,7 +40,7 @@ wemoConfig = {
 }
 
 new FauxMo(wemoConfig);
-logger.info('garage-pi started..')
+logger.info('garage-pi-zero started..')
 
 process.on('SIGINT', () => {
   relay.unexport();
