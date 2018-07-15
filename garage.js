@@ -33,7 +33,7 @@ wemoConfig = {
   devices: [
     {
       name: 'garage',
-      port: 11000,
+      port: 11001,
       handler: (action) => handleAlexa(action),
     },
   ]
