@@ -32,8 +32,8 @@ function handleAlexa(action) {
 wemoConfig = {
   devices: [
     {
-      name: 'garage-pi-zero',
-      port: 11001,
+      name: 'garage',
+      port: 11002,
       handler: (action) => handleAlexa(action),
     },
   ]
