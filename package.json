@@ -2,8 +2,7 @@
   "main": "garage.js",
   "dependencies": {
     "fauxmojs": "^1.0.3",
-    "onoff": "^3.1.0",
-    "raspberry-pi-mjpeg-server": "^1.0.1",
-    "winston": "^3.0.0"
+    "onoff": "^4.1.1",
+    "winston": "^3.2.1"
   }
 }
