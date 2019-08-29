@@ -1,4 +1,4 @@
-# garage
+# smart-garage
 
 Control garage using Alexa through raspi
 
@@ -9,8 +9,7 @@ https://youtu.be/kkG1skNiGRY
 ## Install
 
 ```shell
-yarn
-yarn global add pm2
+npm i
 ```
 
 ## Setup Raspi Zero

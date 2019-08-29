@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda to control smart-garage using Alexa Smart Home skill
+
+Resources:
+  SmartGarageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Lambda to control smart-garage using Alexa Smart Home skill
+      CodeUri: .
+      Handler: src/app.handler
+      Runtime: nodejs10.x
+      Tracing: Active
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Environment:
+        Variables:
+          DDB_TABLE_NAME: !Ref DDBTable
+
+      # TODO: https://github.com/awslabs/serverless-application-model/pull/363
+      # Events:
+      #   AlexaSkillEvent:
+      #     Type: AlexaSkill
+
+  DDBTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      ProvisionedThroughput:
+        ReadCapacityUnits: 0
+        WriteCapacityUnits: 0
+
+Outputs:
+  LambdaFunction:
+    Description: "Lambda function ARN"
+    Value: !GetAtt SmartGarageFunction.Arn
