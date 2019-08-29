@@ -73,7 +73,7 @@ device.on('connect', () => {
 
 device.on('message', (_, payload) => handleStateUpdate(payload));
 
-function handleStateUpdate() {
+function handleStateUpdate(payload) {
   try {
     const message = JSON.parse(payload);
     if (!message.newState) {
@@ -85,7 +85,8 @@ function handleStateUpdate() {
     logger.info(`Requested to change state. Current: ${currentDeviceState} New: ${newState}`);
     if (message.deviceId === clientId && validDeviceStates.includes(newState) && currentDeviceState !== newState) {
       currentDeviceState = newState;
-      relay.write(0, () => setTimeout(() => relay.writeSync(1), 500));
+      if (os.platform() === 'linux')
+        relay.write(0, () => setTimeout(() => relay.writeSync(1), 500));
     }
   } catch (e) {
     logger.error('Invalid JSON received over topic', e);

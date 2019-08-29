@@ -1,11 +1,16 @@
+require('dotenv').config();
 const AWS = require('aws-sdk');
-// TODO: use env
-AWS.config.update({region:'us-east-1'});
+AWS.config.update({region:process.env.AWS_SERVICE_REGION});
+const iotdata = new AWS.IotData({endpoint: process.env.IOT_ENDPOINT});
+
 const AlexaResponse = require("./response.js");
-let currentState = "UNLOCKED";
 
 const DDB_TABLE_NAME = process.env.DDB_TABLE_NAME;
 const ddb = new AWS.DynamoDB.DocumentClient();
+
+let currentState = "UNLOCKED";
+const clientId = process.env.IOT_CLIENT_ID;
+const iotTopic = `${process.env.IOT_TOPIC_PREFIX}\\${clientId}`;
 
 exports.handler = async function (event, context) {
     // console.log(JSON.stringify(event));
@@ -49,7 +54,7 @@ function handleDiscovery() {
 
     adr.addPayloadEndpoint({
       friendlyName: "Garage Door",
-      endpointId: "garage-lock-01",
+      endpointId: clientId,
       capabilities: [capability_alexa, lock, health]
     });
 
@@ -70,6 +75,18 @@ async function handleLockController(event) {
   ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: currentState});
 
   await setDeviceState(endpointId, currentState);
+
+  const params = {
+    topic: iotTopic,
+    payload: JSON.stringify({
+      newState: currentState,
+      deviceId: clientId
+    }),
+    qos: 0
+  };
+
+  const pubRes = await iotdata.publish(params).promise();
+  console.log('pubRes ', pubRes);
 
   return ar.get();
 }
