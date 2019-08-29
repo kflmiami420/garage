@@ -1,10 +1,15 @@
 # smart-garage
 
-Control garage using Alexa through raspi
+Control your garage using Alexa using Raspberry Pi.
 
 ## Live Demo
 
 https://youtu.be/kkG1skNiGRY
+
+## Required Hardwares
+
+1) Raspberry Pi Zero W for about $5
+2) Relay switch for about $10
 
 ## Install
 
