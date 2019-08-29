@@ -11,6 +11,7 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 let currentState = "UNLOCKED";
 const clientId = process.env.IOT_CLIENT_ID;
 const iotTopic = `${process.env.IOT_TOPIC_PREFIX}\\${clientId}`;
+const alexaDeviceName = process.env.ALEXA_DEVICE_NAME || 'Garage';
 
 exports.handler = async function (event, context) {
     // console.log(JSON.stringify(event));
@@ -53,7 +54,7 @@ function handleDiscovery() {
     });
 
     adr.addPayloadEndpoint({
-      friendlyName: "Garage Door",
+      friendlyName: alexaDeviceName,
       endpointId: clientId,
       capabilities: [capability_alexa, lock, health]
     });
@@ -85,8 +86,7 @@ async function handleLockController(event) {
     qos: 0
   };
 
-  const pubRes = await iotdata.publish(params).promise();
-  console.log('pubRes ', pubRes);
+  await iotdata.publish(params).promise();
 
   return ar.get();
 }
