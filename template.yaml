@@ -16,10 +16,8 @@ Resources:
         - AWSIoTFullAccess
       Environment:
         Variables:
-          ALEXA_DEVICE_NAME: Garage
           AWS_SERVICE_REGION: us-east-1
           DDB_TABLE_NAME: !Ref DDBTable
-          IOT_ENDPOINT: xxx.iot.us-east-1.amazonaws.com
           IOT_TOPIC_PREFIX: smart-garage
           # TODO: support multiple garage, clients
           IOT_CLIENT_ID: lotus-garage-raspi-w

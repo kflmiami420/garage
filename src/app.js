@@ -1,16 +1,16 @@
 require('dotenv').config();
+const AlexaResponse = require("./response.js");
 const AWS = require('aws-sdk');
 AWS.config.update({region:process.env.AWS_SERVICE_REGION});
 const iotdata = new AWS.IotData({endpoint: process.env.IOT_ENDPOINT});
-
-const AlexaResponse = require("./response.js");
 
 const DDB_TABLE_NAME = process.env.DDB_TABLE_NAME;
 const ddb = new AWS.DynamoDB.DocumentClient();
 
 let currentState = "UNLOCKED";
-const clientId = process.env.IOT_CLIENT_ID;
-const iotTopic = `${process.env.IOT_TOPIC_PREFIX}\\${clientId}`;
+const clientId = process.env.IOT_CLIENT_ID || 'raspi-garage-001';
+const iotTopicPrefix = process.env.IOT_TOPIC_PREFIX || 'smart-garage';
+const iotTopic = `${iotTopicPrefix}\\${clientId}`;
 const alexaDeviceName = process.env.ALEXA_DEVICE_NAME || 'Garage';
 
 exports.handler = async function (event, context) {
