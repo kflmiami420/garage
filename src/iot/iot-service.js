@@ -2,9 +2,10 @@ require('dotenv').config();
 const awsIot = require('aws-iot-device-sdk');
 const path = require('path');
 const { format, createLogger, transports } = require('winston');
+const WinstonCloudWatch = require('winston-cloudwatch');
 const Gpio = require('onoff').Gpio;
+const os = require('os');
 
-// TODO: log to cloudwatch
 const logger = createLogger({
   format: format.combine(
     format.timestamp({
@@ -14,7 +15,12 @@ const logger = createLogger({
     format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
   ),
   transports: [
-    new transports.Console()
+    new transports.Console(),
+    new WinstonCloudWatch({
+      awsRegion: 'us-east-1',
+      logGroupName: 'smart-garage',
+      logStreamName: `garage-${Math.floor(new Date() / 1000)}`
+    })
   ]
 });
 
@@ -36,7 +42,9 @@ const device = awsIot.device({ keyPath, certPath, caPath, clientId, host });
 let currentDeviceState = 'UNLOCKED';
 const validDeviceStates = ['LOCKED', 'UNLOCKED', 'JAMMED'];
 
-const relay = new Gpio(gpioPin, 'high');
+let relay;
+if (os.platform() === 'linux')
+  relay = new Gpio(gpioPin, 'high');
 
 shadow.on('connect', () => {
   shadow.register(shadowName, {}, () => {
