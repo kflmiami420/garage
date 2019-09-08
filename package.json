@@ -9,11 +9,11 @@
   "dependencies": {
     "ask-sdk": "^2.7.0",
     "aws-iot-device-sdk": "^2.2.1",
-    "aws-sdk": "^2.518.0",
+    "aws-sdk": "^2.524.0",
     "dotenv": "^8.1.0",
     "onoff": "^4.1.4",
     "winston": "^3.2.1",
-    "winston-cloudwatch": "^2.0.7"
+    "winston-cloudwatch": "^2.0.9"
   },
   "scripts": {
     "package": "sam package --s3-bucket sam-lambda-us-east-1 --s3-prefix smart-garage-alexa-skill --output-template-file template_packaged.yaml",
