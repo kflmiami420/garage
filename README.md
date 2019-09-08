@@ -34,3 +34,7 @@ git clone https://github.com/kienpham2000/garage.git
 dtparam=act_led_trigger=none
 dtparam=act_led_activelow=on
 ```
+
+## Raspi Zero W GPIO Pinout
+
+![gpio](docs/raspi-0w-gpio-pinout.png)
