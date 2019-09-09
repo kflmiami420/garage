@@ -11,6 +11,7 @@
     "aws-iot-device-sdk": "^2.2.1",
     "aws-sdk": "^2.524.0",
     "dotenv": "^8.1.0",
+    "gpio": "^0.2.10",
     "onoff": "^4.1.4",
     "winston": "^3.2.1",
     "winston-cloudwatch": "^2.0.9"
