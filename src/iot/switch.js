@@ -11,15 +11,15 @@ pin = gpio.export(pin_num, {
 
   // set the time interval (ms) between each read when watching for value changes
   // note: this is default to 100, setting value too low will cause high CPU usage
-  // interval: 200,
+  interval: 100,
 
   // Due to the asynchronous nature of exporting a header, you may not be able to
   // read or write to the header right away. Place your logic in this ready
   // function to guarantee everything will get fired properly
-  ready: function() {
-    console.log('ready now...')
+  ready: () => {
+    console.log('ready now...');
 
-    pin.on("change", function(val) {
+    pin.on("change", (val) => {
       // value will report either 1 or 0 (number) when the value changes
       console.log("on change ", val)
     });
