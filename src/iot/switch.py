@@ -1,5 +1,6 @@
 import gpio4.GPIO as GPIO
 import time
+import wiringpi
 
 GPIO.setmode(GPIO.BCM)
 
