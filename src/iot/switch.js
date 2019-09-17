@@ -18,7 +18,10 @@ pin = gpio.export(pin_num, {
   // function to guarantee everything will get fired properly
   ready: () => {
     console.log('ready now...');
-    pin.set();
+    pin.set(() => {
+      console.log('set value ', pin.value);
+    });
+
     pin.on("change", (val) => {
       // value will report either 1 or 0 (number) when the value changes
       console.log("on change ", val)
