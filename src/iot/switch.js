@@ -1,8 +1,10 @@
 // must set high first: echo high > /sys/class/gpio/gpio21/direction
 const gpio = require("gpio");
-let pin;
 
-pin = gpio.export(23, {
+let pin;
+const pin_num = process.env.PIN;
+
+pin = gpio.export(pin_num, {
   // When you export a pin, the default direction is out. This allows you to set
   // the pin value to either LOW or HIGH (3.3V) from your program.
   direction: gpio.DIRECTION.IN,
@@ -17,6 +19,11 @@ pin = gpio.export(23, {
   ready: function() {
     console.log('ready now...')
 
+    pin.on("change", function(val) {
+      // value will report either 1 or 0 (number) when the value changes
+      console.log("on change ", val)
+    });
+
     // setInterval(() => {
     //   gpio.read(pin).then(val => {
     //     // `val` is numeric value of GPIO pin 3
@@ -28,7 +35,3 @@ pin = gpio.export(23, {
 });
 
 
-pin.on("change", function(val) {
-  // value will report either 1 or 0 (number) when the value changes
-  console.log("on change ", val)
-});
