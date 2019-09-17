@@ -35,7 +35,7 @@ npm i
   sudo wget -O - https://raw.githubusercontent.com/sdesalas/node-pi-zero/master/install-node-v.last.sh | bash
 
   # install required services
-  sudo apt install yarn git vim htop python3-pip -y
+  sudo apt install yarn git vim htop python3-pip wiringpi -y
 
   # clone this repo
   git clone https://github.com/kienpham2000/garage.git
