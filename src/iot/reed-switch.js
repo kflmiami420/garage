@@ -16,4 +16,4 @@ setInterval(() => {
     // `val` is numeric value of GPIO pin 3
     console.log('pin val is ', val)
   });
-}, 100);
+}, 1000);
