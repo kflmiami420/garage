@@ -15,7 +15,8 @@
     "onoff": "^4.1.4",
     "rpi-gpio": "^2.1.3",
     "winston": "^3.2.1",
-    "winston-cloudwatch": "^2.0.9"
+    "winston-cloudwatch": "^2.0.9",
+    "wpi-gpio": "^1.2.0"
   },
   "scripts": {
     "package": "sam package --s3-bucket sam-lambda-us-east-1 --s3-prefix smart-garage-alexa-skill --output-template-file template_packaged.yaml",

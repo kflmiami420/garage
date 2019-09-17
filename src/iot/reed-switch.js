@@ -1,7 +1,18 @@
-var gpio = require('rpi-gpio');
+// must set high first: echo high > /sys/class/gpio21/direction
+const gpio = require('wpi-gpio');
 
-gpio.on('change', function(channel, value) {
-	console.log('Channel ' + channel + ' value is now ' + value);
+// gpio.BCM_GPIO = true;
+const pin = 21;
+
+gpio.input(pin).then(() => {
+  gpio.write(pin, 1).then(() => {
+    console.log('write success')
+  });
 });
 
-gpio.setup(21, gpio.DIR_IN, gpio.EDGE_BOTH);
+gpio.read(pin).then(val => {
+  // `val` is numeric value of GPIO pin 3
+  console.log('pin val is ', val)
+});
+
+
