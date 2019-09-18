@@ -1,14 +1,12 @@
-import gpio4.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
-import wiringpi
 
 GPIO.setmode(GPIO.BCM)
+pin = 21
 
-pin1 = 23
-pin2 = 21
-
-GPIO.setup([pin1, pin2], GPIO.IN)
+GPIO.setup(pin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 
 while True:
-    GPIO.input([pin1, pin2])
-    time.sleep(1)
+    val = GPIO.input(pin)
+    print('val ', val)
+    time.sleep(0.5)
