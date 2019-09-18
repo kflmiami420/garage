@@ -16,9 +16,9 @@ currentState = ''
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 CERTS_PATH = Path.cwd().joinpath('src', 'certs')
-ROOT_CA = CERTS_PATH.joinpath("AmazonRootCA1.pem")
-PRIVATE_KEY = CERTS_PATH.joinpath("private.pem.key")
-CERT_FILE = CERTS_PATH.joinpath("certificate.pem.crt")
+ROOT_CA = str(CERTS_PATH.joinpath("AmazonRootCA1.pem"))
+PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
+CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
 SHADOW_HANDLER = "garage"
 
 # Automatically called whenever the shadow is updated.
