@@ -11,6 +11,7 @@ load_dotenv()
 switchChannel = int(os.environ['SWITCH_CHANNEL'])
 shadowName = os.environ['IOT_CLIENT_ID']
 iotEndpoint = os.environ['IOT_ENDPOINT']
+iotTopicPrefix = os.environ['IOT_TOPIC_PREFIX']
 
 GPIO.setmode(GPIO.BCM)
 currentState = ''
@@ -20,7 +21,6 @@ CERTS_PATH = Path.cwd().joinpath('src', 'iot', 'certs')
 ROOT_CA = str(CERTS_PATH.joinpath("AmazonRootCA1.pem"))
 PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
 CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
-SHADOW_HANDLER = "smart-garage"
 
 def shadowUpdateCallback(payload, responseStatus, token):
     print("payload = " + payload)
@@ -34,7 +34,7 @@ shadowClient.configureConnectDisconnectTimeout(10)
 shadowClient.configureMQTTOperationTimeout(5)
 shadowClient.connect()
 
-deviceShadow = shadowClient.createShadowHandlerWithName(SHADOW_HANDLER, True)
+deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
 
 while True:
     shadowPayload = {
@@ -54,6 +54,9 @@ while True:
             shadowPayload["state"]["reported"]["status"] = "close"
             print('garage close')
 
-        deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
+        try:
+            deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
+        except Exception as e:
+            print(e)
 
     time.sleep(0.5)
