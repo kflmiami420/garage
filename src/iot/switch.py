@@ -22,11 +22,6 @@ ROOT_CA = str(CERTS_PATH.joinpath("AmazonRootCA1.pem"))
 PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
 CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
 
-def shadowUpdateCallback(payload, responseStatus, token):
-    print("payload = " + payload)
-    print("responseStatus = " + responseStatus)
-    print("token = " + token)
-
 shadowClient = AWSIoTMQTTShadowClient(shadowName)
 shadowClient.configureEndpoint(iotEndpoint, 8883)
 shadowClient.configureCredentials(ROOT_CA, PRIVATE_KEY, CERT_FILE)
@@ -36,27 +31,32 @@ shadowClient.connect()
 
 deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
 
+def shadowUpdateCallback(payload, responseStatus, token):
+  print("shadow update status: {}, payload: {}".format(responseStatus, payload))
+  if (responseStatus != "accepted"):
+    print("problem with shadow update")
+
 while True:
-    shadowPayload = {
-        "state": {
-            "reported": {
-                "status": ""
-            }
+  shadowPayload = {
+    "state": {
+        "reported": {
+            "status": ""
         }
     }
-    switchVal = GPIO.input(switchChannel)
-    if currentState != switchVal:
-        currentState = switchVal
-        if currentState == GPIO.HIGH:
-            print('garage open')
-            shadowPayload["state"]["reported"]["status"] = "open"
-        else:
-            shadowPayload["state"]["reported"]["status"] = "close"
-            print('garage close')
+  }
+  switchVal = GPIO.input(switchChannel)
+  if currentState != switchVal:
+    currentState = switchVal
+    if currentState == GPIO.HIGH:
+      print('garage open')
+      shadowPayload["state"]["reported"]["status"] = "open"
+    else:
+      shadowPayload["state"]["reported"]["status"] = "close"
+      print('garage close')
 
-        try:
-            deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
-        except Exception as e:
-            print(e)
+    try:
+      deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
+    except Exception as e:
+      print('Problem updating shadow state', e)
 
-    time.sleep(0.5)
+  time.sleep(0.5)
