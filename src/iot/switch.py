@@ -39,9 +39,9 @@ shadowClient.connect()
 deviceShadow = shadowClient.createShadowHandlerWithName(SHADOW_HANDLER, True)
 
 while True:
-    val = GPIO.input(pin)
-    if currentState != val:
-        currentState = val
+    switchVal = GPIO.input(switchChannel)
+    if currentState != switchVal:
+        currentState = switchVal
         if currentState == GPIO.HIGH:
             print('garage open')
         else:
