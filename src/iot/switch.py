@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 import os
+import json
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 from dotenv import load_dotenv
 from pathlib import Path
@@ -48,6 +49,6 @@ while True:
             print('garage close')
 
         # '{"state":{"reported":{"door_X":"open"}}}'
-        deviceShadow.shadowUpdate(shadowPayload, shadowUpdateCallback, 5)
+        deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
 
     time.sleep(0.5)
