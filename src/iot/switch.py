@@ -15,7 +15,7 @@ GPIO.setmode(GPIO.BCM)
 currentState = ''
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-CERTS_PATH = Path.cwd().joinpath('src', 'certs')
+CERTS_PATH = Path.cwd().joinpath('src', 'iot', 'certs')
 ROOT_CA = str(CERTS_PATH.joinpath("AmazonRootCA1.pem"))
 PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
 CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
