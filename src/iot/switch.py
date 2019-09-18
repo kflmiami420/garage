@@ -39,15 +39,16 @@ def shadowUpdateCallback(payload, responseStatus, token):
   if (responseStatus != "accepted"):
     print("problem with shadow update")
 
-while True:
-  shadowPayload = {
-    "state": {
-        "reported": {
-            "status": "",
-            "iot_id": shadowName
-        }
+shadowPayload = {
+  "state": {
+    "reported": {
+      "status": "",
+      "iot_id": shadowName
     }
   }
+}
+
+while True:
   switchVal = GPIO.input(switchChannel)
   if currentState != switchVal:
     shadowPayload["state"]["reported"]["status"] = lockStateMapping[switchVal]
@@ -55,6 +56,7 @@ while True:
 
     try:
       deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
+      currentState == switchVal
     except Exception as e:
       print('Problem updating shadow state', e)
 
