@@ -49,14 +49,14 @@ shadowPayload = {
 }
 
 while True:
-  switchVal = GPIO.input(switchChannel)
-  if currentState != switchVal:
-    shadowPayload["state"]["reported"]["status"] = lockStateMapping[switchVal]
-    print("Garage state: {}".format(shadowPayload["state"]["reported"]["status"]))
+  switchChannelVal = GPIO.input(switchChannel)
+  if currentState != switchChannelVal:
+    shadowPayload["state"]["reported"]["status"] = lockStateMapping[switchChannelVal]
 
     try:
       deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
-      currentState == switchVal
+      currentState == switchChannelVal
+      print("switch channel val: {}, state: {}".format(currentState, lockStateMapping[switchChannelVal]))
     except Exception as e:
       print('Problem updating shadow state', e)
 
