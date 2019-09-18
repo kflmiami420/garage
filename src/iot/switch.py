@@ -3,6 +3,7 @@ import time
 import os
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
@@ -14,9 +15,10 @@ GPIO.setmode(GPIO.BCM)
 currentState = ''
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-ROOT_CA = "certs/AmazonRootCA1.pem"
-PRIVATE_KEY = "private.pem.key"
-CERT_FILE = "certificate.pem.crt"
+CERTS_PATH = Path.cwd().joinpath('src', 'certs')
+ROOT_CA = CERTS_PATH.joinpath("AmazonRootCA1.pem")
+PRIVATE_KEY = CERTS_PATH.joinpath("private.pem.key")
+CERT_FILE = CERTS_PATH.joinpath("certificate.pem.crt")
 SHADOW_HANDLER = "garage"
 
 # Automatically called whenever the shadow is updated.
