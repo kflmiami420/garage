@@ -3,10 +3,13 @@ import time
 
 GPIO.setmode(GPIO.BCM)
 pin = 21
+currentState = GPIO.LOW
 
-GPIO.setup(pin,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+GPIO.setup(pin, GPIO.IN, initial=currentState, pull_up_down=GPIO.PUD_UP)
 
 while True:
     val = GPIO.input(pin)
-    print('val ', val)
+    if currentState != val:
+        currentState = val
+        print('val ', val)
     time.sleep(0.5)
