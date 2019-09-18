@@ -4,10 +4,20 @@ const Gpio = require('onoff').Gpio;
 
 const pinNumber = process.env.PIN;
 
-const reed = new Gpio(pinNumber, 'in', 'both');
+const reed = new Gpio(pinNumber, 'in', 'rising', {debounceTimeout: 50});
 
 reed.watch((err, value) => {
   console.log('watching ', err, value);
+});
+
+console.log('ready...');
+
+setInterval(() => {
+  console.log('curr val ', reed.readSync())
+}, 500);
+
+process.on('SIGINT', () => {
+  reed.unexport();
 });
 
 // pin = gpio.export(pin_num, {
