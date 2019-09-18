@@ -21,13 +21,10 @@ PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
 CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
 SHADOW_HANDLER = "garage"
 
-# Automatically called whenever the shadow is updated.
-def myShadowUpdateCallback(payload, responseStatus, token):
-  print('UPDATE: $aws/things/' + SHADOW_HANDLER +
-    '/shadow/update/#')
-  print("payload = " + payload)
-  print("responseStatus = " + responseStatus)
-  print("token = " + token)
+def shadowUpdateCallback(payload, responseStatus, token):
+    print("payload = " + payload)
+    print("responseStatus = " + responseStatus)
+    print("token = " + token)
 
 shadowClient = AWSIoTMQTTShadowClient(shadowName)
 shadowClient.configureEndpoint(iotEndpoint, 8883)
@@ -39,13 +36,18 @@ shadowClient.connect()
 deviceShadow = shadowClient.createShadowHandlerWithName(SHADOW_HANDLER, True)
 
 while True:
+    shadowPayload = { "state": "" }
     switchVal = GPIO.input(switchChannel)
     if currentState != switchVal:
         currentState = switchVal
         if currentState == GPIO.HIGH:
             print('garage open')
+            shadowPayload["state"] = "open"
         else:
+            shadowPayload["state"] = "close"
             print('garage close')
-        # deviceShadow.shadowUpdate('{"state":{"reported":{"door_X":"open"}}}', myShadowUpdateCallback, 5)
+
+        # '{"state":{"reported":{"door_X":"open"}}}'
+        deviceShadow.shadowUpdate(shadowPayload, shadowUpdateCallback, 5)
 
     time.sleep(0.5)
