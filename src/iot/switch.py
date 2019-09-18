@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-switchChannel = os.environ['SWITCH_CHANNEL']
+switchChannel = int(os.environ['SWITCH_CHANNEL'])
 shadowName = os.environ['IOT_CLIENT_ID']
 iotEndpoint = os.environ['IOT_ENDPOINT']
 
