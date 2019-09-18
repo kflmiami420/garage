@@ -39,8 +39,8 @@ def shadowUpdateCallback(payload, responseStatus, token):
 
 while True:
   shadowPayload = {
-    "iot_id": shadowName, # for DDB v2 to save as primary hash
-    "datetime": datetime.now().isoformat(),
+    # "iot_id": shadowName, # for DDB v2 to save as primary hash
+    # "datetime": datetime.now().isoformat(),
     "state": {
         "reported": {
             "status": "",
