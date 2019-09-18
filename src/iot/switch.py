@@ -20,7 +20,7 @@ CERTS_PATH = Path.cwd().joinpath('src', 'iot', 'certs')
 ROOT_CA = str(CERTS_PATH.joinpath("AmazonRootCA1.pem"))
 PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
 CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
-SHADOW_HANDLER = "garage"
+SHADOW_HANDLER = "smart-garage"
 
 def shadowUpdateCallback(payload, responseStatus, token):
     print("payload = " + payload)
@@ -54,7 +54,6 @@ while True:
             shadowPayload["state"]["reported"]["status"] = "close"
             print('garage close')
 
-        # '{"state":{"reported":{"door_X":"open"}}}'
         deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
 
     time.sleep(0.5)
