@@ -55,7 +55,7 @@ while True:
 
     try:
       deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
-      currentState == switchChannelVal
+      currentState = switchChannelVal
       print("switch channel val: {}, state: {}".format(currentState, lockStateMapping[switchChannelVal]))
     except Exception as e:
       print('Problem updating shadow state', e)
