@@ -39,8 +39,9 @@ deviceShadow = shadowClient.createShadowHandlerWithName(SHADOW_HANDLER, True)
 while True:
     shadowPayload = {
         "state": {
-            "thing": shadowName,
-            "status": ""
+            "reported": {
+                "status": ""
+            }
         }
     }
     switchVal = GPIO.input(switchChannel)
@@ -48,9 +49,9 @@ while True:
         currentState = switchVal
         if currentState == GPIO.HIGH:
             print('garage open')
-            shadowPayload["state"]["status"] = "open"
+            shadowPayload["state"]["reported"]["status"] = "open"
         else:
-            shadowPayload["state"]["status"] = "close"
+            shadowPayload["state"]["reported"]["status"] = "close"
             print('garage close')
 
         # '{"state":{"reported":{"door_X":"open"}}}'
