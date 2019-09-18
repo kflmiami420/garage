@@ -5,6 +5,7 @@ import json
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime
 
 load_dotenv()
 
@@ -38,9 +39,12 @@ def shadowUpdateCallback(payload, responseStatus, token):
 
 while True:
   shadowPayload = {
+    "device_id": shadowName,
+    "datetime": datetime.now().isoformat(),
     "state": {
         "reported": {
-            "status": ""
+            "status": "",
+            "iot_id": shadowName
         }
     }
   }
