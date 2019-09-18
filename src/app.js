@@ -1,32 +1,37 @@
 require('dotenv').config();
 const AlexaResponse = require("./response.js");
 const AWS = require('aws-sdk');
-AWS.config.update({region:process.env.AWS_SERVICE_REGION});
+
+// AWS.config.update({region:process.env.AWS_SERVICE_REGION});
 const iotdata = new AWS.IotData({endpoint: process.env.IOT_ENDPOINT});
 
-const DDB_TABLE_NAME = process.env.DDB_TABLE_NAME;
-const ddb = new AWS.DynamoDB.DocumentClient();
-
-let currentState = "UNLOCKED";
-const clientId = process.env.IOT_CLIENT_ID || 'raspi-garage-001';
-const iotTopicPrefix = process.env.IOT_TOPIC_PREFIX || 'smart-garage';
-const iotTopic = `${iotTopicPrefix}\\${clientId}`;
-const alexaDeviceName = process.env.ALEXA_DEVICE_NAME || 'Garage';
+const clientId = process.env.IOT_CLIENT_ID;
+const iotTopic = `${process.env.IOT_TOPIC_PREFIX}\\${clientId}`;
+const iotThingName = process.env.IOT_THING_NAME;
+const alexaDeviceName = process.env.ALEXA_DEVICE_NAME;
+const stateLockMapping = {
+  'open': 'UNLOCKED',
+  'close': 'LOCKED',
+  'lock': 'close',
+  'unlock': 'open',
+  'LOCKED': 'close',
+  'UNLOCKED': 'open',
+};
 
 exports.handler = async function (event, context) {
-    // console.log(JSON.stringify(event));
-    const namespace = event.directive.header.namespace.toLowerCase();
-    const directiveName = event.directive.header.name.toLowerCase();
-    console.log(`namespace is ${namespace}  -  directive name: ${directiveName}`);
+  // console.log(JSON.stringify(event));
+  const namespace = event.directive.header.namespace.toLowerCase();
+  const directiveName = event.directive.header.name.toLowerCase();
+  console.log(`namespace is ${namespace}  -  directive name: ${directiveName}`);
 
-    switch(namespace) {
-        case 'alexa.authorization': return handleAuth();
-        case 'alexa.discovery': return handleDiscovery();
-        case 'alexa.lockcontroller': return handleLockController(event);
-        case 'alexa':
-            if (directiveName === 'reportstate') return handleReportState(event);
-        default: console.log('Unknown namespamce: ', namespace);
-    }
+  switch(namespace) {
+      case 'alexa.authorization': return handleAuth();
+      case 'alexa.discovery': return handleDiscovery();
+      case 'alexa.lockcontroller': return handleLockController(event);
+      case 'alexa':
+          if (directiveName === 'reportstate') return handleReportState(event);
+      default: console.log('Unknown namespamce: ', namespace);
+  }
 };
 
 function handleAuth() {
@@ -63,30 +68,28 @@ function handleDiscovery() {
 }
 
 async function handleLockController(event) {
-  let requestedAction = event.directive.header.name.toUpperCase();
-  if (requestedAction === "UNLOCK") requestedAction = "UNLOCKED";
-  if (requestedAction === "LOCK") requestedAction = "LOCKED";
-  if (requestedAction && requestedAction !== currentState) currentState = requestedAction;
-
+  const requestedAction = event.directive.header.name.toLowerCase();
+  const desiredState = stateLockMapping[requestedAction];
   const endpointId = event.directive.endpoint.endpointId;
   const token = event.directive.endpoint.scope.token;
   const correlationToken = event.directive.header.correlationToken;
 
+  const updateRes = await iotdata.updateThingShadow({payload: {state: desiredState}, thingName}).promise();
+  console.log('update thing res ', updateRes);
+
   const ar = new AlexaResponse({ correlationToken, token, endpointId });
-  ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: currentState});
+  ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: desiredState});
 
-  await setDeviceState(endpointId, currentState);
+  // const params = {
+  //   topic: iotTopic,
+  //   payload: JSON.stringify({
+  //     newState: desiredState,
+  //     deviceId: clientId
+  //   }),
+  //   qos: 0
+  // };
 
-  const params = {
-    topic: iotTopic,
-    payload: JSON.stringify({
-      newState: currentState,
-      deviceId: clientId
-    }),
-    qos: 0
-  };
-
-  await iotdata.publish(params).promise();
+  // await iotdata.publish(params).promise();
 
   return ar.get();
 }
@@ -96,53 +99,17 @@ async function handleReportState(event) {
     const token = event.directive.endpoint.scope.token;
     const correlationToken = event.directive.header.correlationToken;
 
-    const deviceState = await getDeviceState(endpointId);
-    if (deviceState.Item && deviceState.Item.state)
-      currentState = deviceState.Item.state;
+    const deviceState = await getDeviceShadowState(iotThingName);
 
     const ar = new AlexaResponse({ correlationToken, token, endpointId, name: "StateReport" });
-    ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: currentState});
+    ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: stateLockMapping[deviceState]});
 
     return ar.get();
 }
 
-async function setDeviceState(endpointId, state) {
-  const now = new Date().toISOString();
-  const items = [
-    {
-      PutRequest: {
-        Item: {
-          id: endpointId,
-          timestamp: "latest",
-          state
-        }
-      }
-    },
-    {
-      PutRequest: {
-        Item: {
-          id: endpointId,
-          timestamp: now,
-          state
-        }
-      }
-    }
-  ];
-  const params = { RequestItems: { [DDB_TABLE_NAME]: items }};
+async function getDeviceShadowState(thingName) {
+  let shadowState = await iotdata.getThingShadow({thingName}).promise();
+  shadowState = JSON.parse(shadowState.payload);
 
-  return ddb.batchWrite(params).promise();
-}
-
-async function getDeviceState(endpointId) {
-  const params = {
-    TableName : DDB_TABLE_NAME,
-    Key: {
-      id: endpointId,
-      timestamp: "latest"
-    }
-  };
-
-  const res = await ddb.get(params).promise();
-
-  return res;
+  return shadowState.state.reported.status; // open | close
 }

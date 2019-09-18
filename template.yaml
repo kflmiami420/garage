@@ -12,38 +12,12 @@ Resources:
       Runtime: nodejs10.x
       Tracing: Active
       Policies:
-        - AmazonDynamoDBFullAccess
         - AWSIoTFullAccess
-      Environment:
-        Variables:
-          AWS_SERVICE_REGION: us-east-1
-          DDB_TABLE_NAME: !Ref DDBTable
-          IOT_TOPIC_PREFIX: smart-garage
-          # TODO: support multiple garage, clients
-          IOT_CLIENT_ID: lotus-garage-raspi-w
 
       # TODO: https://github.com/awslabs/serverless-application-model/pull/363
       # Events:
       #   AlexaSkillEvent:
       #     Type: AlexaSkill
-
-  DDBTable:
-    Type: "AWS::DynamoDB::Table"
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: timestamp
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        - AttributeName: timestamp
-          KeyType: RANGE
-      BillingMode: PAY_PER_REQUEST
-      ProvisionedThroughput:
-        ReadCapacityUnits: 0
-        WriteCapacityUnits: 0
 
 Outputs:
   LambdaFunction:

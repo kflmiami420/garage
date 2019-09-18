@@ -29,7 +29,9 @@ shadowClient.configureCredentials(ROOT_CA, PRIVATE_KEY, CERT_FILE)
 shadowClient.configureConnectDisconnectTimeout(10)
 shadowClient.configureMQTTOperationTimeout(5)
 shadowClient.connect()
-
+lockStateMapping = {}
+lockStateMapping[GPIO.HIGH] = "unlocked"
+lockStateMapping[GPIO.LOW] = "locked"
 deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
 
 def shadowUpdateCallback(payload, responseStatus, token):
@@ -39,8 +41,6 @@ def shadowUpdateCallback(payload, responseStatus, token):
 
 while True:
   shadowPayload = {
-    # "iot_id": shadowName, # for DDB v2 to save as primary hash
-    # "datetime": datetime.now().isoformat(),
     "state": {
         "reported": {
             "status": "",
@@ -50,17 +50,12 @@ while True:
   }
   switchVal = GPIO.input(switchChannel)
   if currentState != switchVal:
-    currentState = switchVal
-    if currentState == GPIO.HIGH:
-      print('garage open')
-      shadowPayload["state"]["reported"]["status"] = "open"
-    else:
-      shadowPayload["state"]["reported"]["status"] = "close"
-      print('garage close')
+    shadowPayload["state"]["reported"]["status"] = lockStateMapping[switchVal]
+    print("Garage state: {}".format(shadowPayload["state"]["reported"]["status"]))
 
     try:
       deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
     except Exception as e:
       print('Problem updating shadow state', e)
 
-  time.sleep(0.5)
+  time.sleep(1)
