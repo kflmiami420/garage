@@ -75,7 +75,6 @@ class Garage:
     print('unlocking...')
 
   def onShadowDelta(self, payload, responseStatus, token):
-    print("shadow delta payload: {}".format(payload))
     payload = json.loads(payload)
     desiredState = payload["state"]["status"]
     if self.currentRealState != desiredState:
@@ -90,8 +89,12 @@ class Garage:
     if (responseStatus != "accepted"):
       print("Problem with shadow update: {}".format(responseStatus))
 
-  # def getShadowState(self):
-  #   self.shadow.shadowGet(self.onShadowGet, 5)
+  def onShadowGet(self, payload, responseStatus, token):
+    payload = json.loads(payload)
+    print('shadow get ', payload)
+
+  def getShadowState(self):
+    self.shadow.shadowGet(self.onShadowGet, 5)
 
   def updateShadow(self, desiredState):
     payload = {
@@ -107,6 +110,7 @@ class Garage:
   def monitor(self):
     print('monitoring for new state')
     self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
+    self.getShadowState()
 
     while True:
       self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
