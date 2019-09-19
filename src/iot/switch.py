@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 load_dotenv()
 
