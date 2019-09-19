@@ -40,10 +40,9 @@ iotTopic = "$aws/things/smart-garage/shadow/update/delta"
 # iotTopic = "$aws/things/smart-garage/shadow/update/accepted"
 
 def handleDesiredStateChange(client, userdata, message):
-  print("handleDesiredStateChange", client, userdata, message)
-  print(message.payload)
-  print("from topic: ")
-  print(message.topic)
+  delta = json.loads(message.payload)
+  desiredState = delta["state"]["status"]
+  print("received desired state: {}".format(desiredState))
 
 
 def handleShadowUpdateCallback(payload, responseStatus, token):
