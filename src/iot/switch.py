@@ -70,13 +70,13 @@ class Garage:
     print('locking...')
     p = GPIO.PWM(self.relayChannel, 0.5)
     p.start(1)
-    # GPIO.output(self.relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
+    GPIO.output(self.relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
 
   def unlock(self):
     print('unlocking...')
     p = GPIO.PWM(self.relayChannel, 0.5)
     p.start(1)
-    # GPIO.output(self.relayChannel, GPIO.LOW)
+    GPIO.output(self.relayChannel, GPIO.LOW)
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
