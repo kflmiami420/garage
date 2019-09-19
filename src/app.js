@@ -9,6 +9,10 @@ const clientId = process.env.IOT_CLIENT_ID;
 const iotTopic = `${process.env.IOT_TOPIC_PREFIX}\\${clientId}`;
 const thingName = process.env.IOT_THING_NAME;
 const alexaDeviceName = process.env.ALEXA_DEVICE_NAME;
+const lockMapping = {
+  lock: "locked",
+  unlock: "unlocked"
+};
 
 exports.handler = async function (event, context) {
   // console.log(JSON.stringify(event));
@@ -60,7 +64,7 @@ function handleDiscovery() {
 }
 
 async function handleLockController(event) {
-  const desiredState = event.directive.header.name.toLowerCase();
+  const desiredState = lockMapping[event.directive.header.name.toLowerCase()];
   const endpointId = event.directive.endpoint.endpointId;
   const token = event.directive.endpoint.scope.token;
   const correlationToken = event.directive.header.correlationToken;
@@ -71,15 +75,6 @@ async function handleLockController(event) {
 
   const ar = new AlexaResponse({ correlationToken, token, endpointId });
   ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: desiredState});
-
-  // const params = {
-  //   topic: iotTopic,
-  //   payload: JSON.stringify(payload),
-  //   qos: 0
-  // };
-
-  // const pubRes = await iotdata.publish(params).promise();
-  // console.log('publish topic res ', pubRes);
 
   return ar.get();
 }

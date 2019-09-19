@@ -17,7 +17,9 @@
     "refresh": "npm run package && npm run deploy",
     "package": "sam package --s3-bucket sam-lambda-us-east-1 --s3-prefix smart-garage-alexa-skill --output-template-file template_packaged.yaml",
     "deploy": "sam deploy --template-file template_packaged.yaml --stack-name smart-garage-alexa-skill --capabilities CAPABILITY_IAM",
-    "test": "cat src/tests/lock-controller-event.json | sam local invoke"
+    "test-unlock": "cat src/tests/unlock-controller-event.json | sam local invoke",
+    "test-lock": "cat src/tests/lock-controller-event.json | sam local invoke"
+
   },
   "devDependencies": {
     "chai": "^4.2.0",

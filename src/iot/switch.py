@@ -9,75 +9,129 @@ from datetime import datetime
 
 load_dotenv()
 
-def handleDesiredStateChange(client, userdata, message):
-  delta = json.loads(message.payload)
-  desiredState = delta["state"]["status"]
-  print("received desired state: {}".format(desiredState))
+switchChannel = int(os.environ['SWITCH_CHANNEL'])
+relayChannel = int(os.environ['RELAY_CHANNEL'])
+shadowName = os.environ['IOT_CLIENT_ID']
+iotEndpoint = os.environ['IOT_ENDPOINT']
+iotTopicPrefix = os.environ['IOT_TOPIC_PREFIX']
+iotThingName = os.environ['IOT_THING_NAME']
+# iotTopic = "{}\{}".format(iotTopicPrefix, iotThingName)
+# iotTopic = "$aws/things/smart-garage/shadow/update/delta"
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-  updateShadow(desiredState)
+certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
+rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
+privateKey = str(certsPath.joinpath("private.pem.key"))
+certFile = str(certsPath.joinpath("certificate.pem.crt"))
 
-def handleShadowUpdateCallback(payload, responseStatus, token):
-  print("shadow update status: {}, payload: {}".format(responseStatus, payload))
-  if (responseStatus != "accepted"):
-    print("problem with shadow update")
+def onDesiredStateChange(client, userdata, message):
+  print('def onDesiredStateChange(client, userdata, message):')
 
-def updateShadow(desiredState):
-  shadowPayload = {
-    "state": {
-      "reported": {
-        "status": desiredState,
-        "iot_id": shadowName
+class IoTConn:
+  def __init__(self, thingName, iotEndpoint, rootCA, privateKey, certFile):
+    self.rootCA = rootCA
+    self.privateKey = privateKey
+    self.certFile = certFile
+    self.iotEndpoint = iotEndpoint
+    self.thingName = thingName
+    self.shadowClient = AWSIoTMQTTShadowClient(self.thingName)
+
+  def connect(self):
+    self.shadowClient.configureEndpoint(iotEndpoint, 8883)
+    self.shadowClient.configureCredentials(self.rootCA, self.privateKey, self.certFile)
+    self.shadowClient.configureConnectDisconnectTimeout(10)
+    self.shadowClient.configureMQTTOperationTimeout(5)
+    self.shadowClient.connect()
+
+  def getShadowClient(self):
+    return self.shadowClient
+
+  def getDeviceShadow(self):
+    self.deviceShadow = self.shadowClient.createShadowHandlerWithName(self.thingName, True)
+
+    return self.deviceShadow
+
+  def getMQTT(self):
+    return self.shadowClient.getMQTTConnection()
+
+
+class Garage:
+  def __init__(self, conn, name, switchChannel, relayChannel):
+    self.previousRealState = ''
+    self.currentRealState = ''
+    self.name = name
+    self.switchChannel = switchChannel
+    self.relayChannel = relayChannel
+    self.lockStateMapping = {}
+    # self.lockStateMapping[GPIO.HIGH] = "unlock"
+    # self.lockStateMapping[GPIO.LOW] = "lock"
+    self.conn = conn
+    self.conn.connect()
+    self.mqtt = self.conn.getMQTT()
+    self.shadow = self.conn.getDeviceShadow()
+
+  def lock(self):
+    print('locking...')
+
+  def unlock(self):
+    print('unlocking...')
+
+  def onDesiredStateChange(client, userdata, message):
+    delta = json.loads(message.payload)
+    desiredState = delta["state"]["status"]
+    print("Received desired state: {}".format(desiredState))
+    # updateShadow(desiredState)
+
+  def onShadowDelta(self, payload, responseStatus, token):
+    print("shadow delta payload: {}".format(payload))
+    payload = json.loads(payload)
+    desiredState = payload["state"]["status"]
+    if self.currentRealState != desiredState:
+      print("new desired state: {}".format(desiredState))
+
+      if desiredState == 'locked': self.lock()
+      elif desiredState == 'unlocked': self.unlock()
+
+    else:
+      print("new desired state is the same as current state: {}".format(self.currentRealState))
+
+  def onShadowUpdate(self, payload, responseStatus, token):
+    print("shadow update status: {}, payload: {}".format(responseStatus, payload))
+    if (responseStatus != "accepted"):
+      print("Problem with shadow update: {}".format(responseStatus))
+
+  def getShadowState(self):
+    self.shadow.shadowGet(self.onShadowGet, 5)
+
+  def updateShadow(self, desiredState):
+    payload = {
+      "state": {
+        "reported": {
+          "status": desiredState,
+          "iot_id": shadowName
+        }
       }
     }
-  }
+    self.shadow.shadowUpdate(payload, self.onShadowUpdate, 5)
 
-  deviceShadow.shadowUpdate(json.dumps(shadowPayload), handleShadowUpdateCallback, 5)
+  def monitor(self):
+    print('monitoring for new state')
+    self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
 
-def run():
-  reportedState = ''
-  mqttClient.subscribe(iotTopic, 1, handleDesiredStateChange)
-
-  while True:
-    desiredState = lockStateMapping[GPIO.input(switchChannel)]
-    if reportedState != desiredState:
-      try:
-        updateShadow(desiredState)
-        print("switch channel desired state: {}, reported state: {}".format(desiredState, reportedState))
-        reportedState = desiredState
-      except Exception as e:
-        print("Problem updating shadow state", e)
-
-    time.sleep(1)
+    while True:
+      self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
+      if self.currentRealState != self.previousRealState:
+        try:
+          self.updateShadow()
+          print("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
+          self.previousRealState = self.currentRealState
+        except Exception as e:
+          print("Problem updating shadow state", e)
+      time.sleep(1)
 
 if __name__ == "__main__":
-  switchChannel = int(os.environ['SWITCH_CHANNEL'])
-  shadowName = os.environ['IOT_CLIENT_ID']
-  iotEndpoint = os.environ['IOT_ENDPOINT']
-  iotTopicPrefix = os.environ['IOT_TOPIC_PREFIX']
-  iotThingName = os.environ['IOT_THING_NAME']
-  iotTopic = "{}\{}".format(iotTopicPrefix, iotThingName)
+  conn = IoTConn(thingName=iotThingName, iotEndpoint=iotEndpoint, rootCA=rootCA, privateKey=privateKey, certFile=certFile)
+  garage = Garage(conn=conn, name=shadowName, switchChannel=switchChannel, relayChannel=relayChannel)
+  garage.monitor()
 
-  GPIO.setmode(GPIO.BCM)
-  GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-  CERTS_PATH = Path.cwd().joinpath('src', 'iot', 'certs')
-  ROOT_CA = str(CERTS_PATH.joinpath("AmazonRootCA1.pem"))
-  PRIVATE_KEY = str(CERTS_PATH.joinpath("private.pem.key"))
-  CERT_FILE = str(CERTS_PATH.joinpath("certificate.pem.crt"))
-
-  shadowClient = AWSIoTMQTTShadowClient(shadowName)
-  shadowClient.configureEndpoint(iotEndpoint, 8883)
-  shadowClient.configureCredentials(ROOT_CA, PRIVATE_KEY, CERT_FILE)
-  shadowClient.configureConnectDisconnectTimeout(10)
-  shadowClient.configureMQTTOperationTimeout(5)
-  shadowClient.connect()
-  lockStateMapping = {}
-  lockStateMapping[GPIO.HIGH] = "unlocked"
-  lockStateMapping[GPIO.LOW] = "locked"
-  deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
-
-  mqttClient = shadowClient.getMQTTConnection()
-  iotTopic = "$aws/things/smart-garage/shadow/update/delta"
-
-
-  run()
