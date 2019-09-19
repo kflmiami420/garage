@@ -104,7 +104,7 @@ class Garage:
         }
       }
     }
-    self.shadow.shadowUpdate(payload, self.onShadowUpdate, 5)
+    self.shadow.shadowUpdate(json.dumps(payload), self.onShadowUpdate, 5)
 
   def monitor(self):
     print('monitoring for new state')
