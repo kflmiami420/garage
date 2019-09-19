@@ -9,8 +9,8 @@ from pathlib import Path
 from datetime import datetime
 
 # logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('iot')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 load_dotenv()
 
