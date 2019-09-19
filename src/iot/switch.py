@@ -16,8 +16,9 @@ iotEndpoint = os.environ['IOT_ENDPOINT']
 iotThingName = os.environ['IOT_THING_NAME']
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-# GPIO.setup(relayChannel, GPIO.OUT)
-GPIO.setup(relayChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(relayChannel, GPIO.OUT)
+p = GPIO.PWM(relayChannel, 0.5)
+p.start(1)
 
 certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
 rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
