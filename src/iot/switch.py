@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
 
+logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 switchChannel = int(os.environ['SWITCH_CHANNEL'])
