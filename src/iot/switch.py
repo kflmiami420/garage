@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('iot')
+logger.level = logging.INFO
 
 load_dotenv()
 
