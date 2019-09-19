@@ -2,14 +2,10 @@ import RPi.GPIO as GPIO
 import time
 import os
 import json
-import logging
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import datetime
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 load_dotenv()
 
@@ -73,25 +69,25 @@ class Garage:
     self.shadow = self.conn.getDeviceShadow()
 
   def lock(self):
-    logger.info('locking...')
+    print('locking...')
 
   def unlock(self):
-    logger.info('unlocking...')
+    print('unlocking...')
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
     desiredState = payload["state"]["status"]
     if self.currentRealState != desiredState:
-      logger.info("new desired state from shadow delta: {}".format(desiredState))
+      print("new desired state from shadow delta: {}".format(desiredState))
       if desiredState == 'locked': self.lock()
       elif desiredState == 'unlocked': self.unlock()
     else:
-      logger.info("new desired state is the same as current state: {}".format(self.currentRealState))
+      print("new desired state is the same as current state: {}".format(self.currentRealState))
 
   def onShadowUpdate(self, payload, responseStatus, token):
-    # logger.info("shadow update status: {}, payload: {}".format(responseStatus, payload))
+    # print("shadow update status: {}, payload: {}".format(responseStatus, payload))
     if (responseStatus != "accepted"):
-      logger.info("Problem with shadow update: {}".format(responseStatus))
+      print("Problem with shadow update: {}".format(responseStatus))
 
   def onShadowGet(self, payload, responseStatus, token):
     payload = json.loads(payload)
@@ -116,11 +112,11 @@ class Garage:
     self.getShadowState()
     self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
     if self.currentRealState != self.previousRealState:
-      logger.info("init: sync state: {}".format(self.currentRealState))
+      print("init: sync state: {}".format(self.currentRealState))
       self.updateShadow(self.currentRealState)
 
   def monitor(self):
-    logger.info('monitoring for new state')
+    print('monitoring for new state')
 
     # self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
 
@@ -129,10 +125,10 @@ class Garage:
       if self.currentRealState != self.previousRealState:
         try:
           self.updateShadow(self.currentRealState)
-          logger.info("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
+          print("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
           self.previousRealState = self.currentRealState
         except Exception as e:
-          logger.info("Problem updating shadow state", e)
+          print("Problem updating shadow state", e)
       time.sleep(1)
 
 if __name__ == "__main__":
