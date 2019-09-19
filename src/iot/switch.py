@@ -25,9 +25,6 @@ rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
 privateKey = str(certsPath.joinpath("private.pem.key"))
 certFile = str(certsPath.joinpath("certificate.pem.crt"))
 
-def onDesiredStateChange(client, userdata, message):
-  print('def onDesiredStateChange(client, userdata, message):')
-
 class IoTConn:
   def __init__(self, thingName, iotEndpoint, rootCA, privateKey, certFile):
     self.rootCA = rootCA
@@ -77,12 +74,6 @@ class Garage:
   def unlock(self):
     print('unlocking...')
 
-  def onDesiredStateChange(client, userdata, message):
-    delta = json.loads(message.payload)
-    desiredState = delta["state"]["status"]
-    print("Received desired state: {}".format(desiredState))
-    # updateShadow(desiredState)
-
   def onShadowDelta(self, payload, responseStatus, token):
     print("shadow delta payload: {}".format(payload))
     payload = json.loads(payload)
@@ -101,8 +92,8 @@ class Garage:
     if (responseStatus != "accepted"):
       print("Problem with shadow update: {}".format(responseStatus))
 
-  def getShadowState(self):
-    self.shadow.shadowGet(self.onShadowGet, 5)
+  # def getShadowState(self):
+  #   self.shadow.shadowGet(self.onShadowGet, 5)
 
   def updateShadow(self, desiredState):
     payload = {
@@ -123,7 +114,7 @@ class Garage:
       self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
       if self.currentRealState != self.previousRealState:
         try:
-          self.updateShadow()
+          self.updateShadow(self.currentRealState)
           print("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
           self.previousRealState = self.currentRealState
         except Exception as e:
