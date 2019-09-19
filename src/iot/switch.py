@@ -39,36 +39,38 @@ deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
 mqttClient = shadowClient.getMQTTConnection()
 iotTopic = "$aws/things/smart-garage/shadow/update"
 # iotTopic = "$aws/things/smart-garage/shadow/update/accepted"
-mqttClient.subscribe(iotTopic, 1, handleDesiredStateChange)
 
 def handleDesiredStateChange(payload, status, token):
   print("handleDesiredStateChange", payload, status, token)
 
-
-def shadowUpdateCallback(payload, responseStatus, token):
+def handleShadowUpdateCallback(payload, responseStatus, token):
   print("shadow update status: {}, payload: {}".format(responseStatus, payload))
   if (responseStatus != "accepted"):
     print("problem with shadow update")
 
-shadowPayload = {
-  "state": {
-    "reported": {
-      "status": "",
-      "iot_id": shadowName
+def run():
+  shadowPayload = {
+    "state": {
+      "reported": {
+        "status": "",
+        "iot_id": shadowName
+      }
     }
   }
-}
+  mqttClient.subscribe(iotTopic, 1, handleDesiredStateChange)
 
-while True:
-  switchChannelVal = GPIO.input(switchChannel)
-  if currentState != switchChannelVal:
-    shadowPayload["state"]["reported"]["status"] = lockStateMapping[switchChannelVal]
+  while True:
+    switchChannelVal = GPIO.input(switchChannel)
+    if currentState != switchChannelVal:
+      shadowPayload["state"]["reported"]["status"] = lockStateMapping[switchChannelVal]
 
-    try:
-      deviceShadow.shadowUpdate(json.dumps(shadowPayload), shadowUpdateCallback, 5)
-      currentState = switchChannelVal
-      print("switch channel val: {}, state: {}".format(currentState, lockStateMapping[switchChannelVal]))
-    except Exception as e:
-      print('Problem updating shadow state', e)
+      try:
+        deviceShadow.shadowUpdate(json.dumps(shadowPayload), handleShadowUpdateCallback, 5)
+        currentState = switchChannelVal
+        print("switch channel val: {}, state: {}".format(currentState, lockStateMapping[switchChannelVal]))
+      except Exception as e:
+        print('Problem updating shadow state', e)
 
-  time.sleep(1)
+    time.sleep(1)
+
+run()
