@@ -34,6 +34,7 @@ def updateShadow(desiredState):
   deviceShadow.shadowUpdate(json.dumps(shadowPayload), handleShadowUpdateCallback, 5)
 
 def run():
+  reportedState = ''
   mqttClient.subscribe(iotTopic, 1, handleDesiredStateChange)
 
   while True:
@@ -78,6 +79,5 @@ if __name__ == "__main__":
   mqttClient = shadowClient.getMQTTConnection()
   iotTopic = "$aws/things/smart-garage/shadow/update/delta"
 
-  reportedState = ''
 
   run()
