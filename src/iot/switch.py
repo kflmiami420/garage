@@ -17,7 +17,6 @@ iotThingName = os.environ['IOT_THING_NAME']
 iotTopic = "{}\{}".format(iotTopicPrefix, iotThingName)
 
 GPIO.setmode(GPIO.BCM)
-currentState = ''
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 CERTS_PATH = Path.cwd().joinpath('src', 'iot', 'certs')
@@ -49,6 +48,7 @@ def handleShadowUpdateCallback(payload, responseStatus, token):
     print("problem with shadow update")
 
 def run():
+  currentState = ''
   shadowPayload = {
     "state": {
       "reported": {
@@ -73,4 +73,5 @@ def run():
 
     time.sleep(1)
 
-run()
+if __name__ == "__main__":
+  run()
