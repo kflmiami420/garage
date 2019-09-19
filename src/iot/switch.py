@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import time
 import os
 import json
+import logging
 from AWSIoTPythonSDK.MQTTLib import AWSIoTMQTTShadowClient
 from dotenv import load_dotenv
 from pathlib import Path
@@ -69,29 +70,29 @@ class Garage:
     self.shadow = self.conn.getDeviceShadow()
 
   def lock(self):
-    print('locking...')
+    logging.info('locking...')
 
   def unlock(self):
-    print('unlocking...')
+    logging.info('unlocking...')
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
     desiredState = payload["state"]["status"]
     if self.currentRealState != desiredState:
-      print("new desired state from shadow delta: {}".format(desiredState))
+      logging.info("new desired state from shadow delta: {}".format(desiredState))
       if desiredState == 'locked': self.lock()
       elif desiredState == 'unlocked': self.unlock()
     else:
-      print("new desired state is the same as current state: {}".format(self.currentRealState))
+      logging.info("new desired state is the same as current state: {}".format(self.currentRealState))
 
   def onShadowUpdate(self, payload, responseStatus, token):
-    # print("shadow update status: {}, payload: {}".format(responseStatus, payload))
+    # logging.info("shadow update status: {}, payload: {}".format(responseStatus, payload))
     if (responseStatus != "accepted"):
-      print("Problem with shadow update: {}".format(responseStatus))
+      logging.info("Problem with shadow update: {}".format(responseStatus))
 
   def onShadowGet(self, payload, responseStatus, token):
     payload = json.loads(payload)
-    print('shadow get ', payload)
+    self.previousRealState = payload["reported"]["status"]
 
   def getShadowState(self):
     self.shadow.shadowGet(self.onShadowGet, 5)
@@ -107,9 +108,16 @@ class Garage:
     }
     self.shadow.shadowUpdate(json.dumps(payload), self.onShadowUpdate, 5)
 
-  def monitor(self):
-    print('monitoring for new state')
+  def init(self):
     self.getShadowState()
+    self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
+    if self.currentRealState != self.previousRealState:
+      logging.info("init: sync state: {}".format(self.currentRealState))
+      self.updateShadow(self.currentRealState)
+
+  def monitor(self):
+    logging.info('monitoring for new state')
+
     # self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
 
     while True:
@@ -117,14 +125,15 @@ class Garage:
       if self.currentRealState != self.previousRealState:
         try:
           self.updateShadow(self.currentRealState)
-          print("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
+          logging.info("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
           self.previousRealState = self.currentRealState
         except Exception as e:
-          print("Problem updating shadow state", e)
+          logging.info("Problem updating shadow state", e)
       time.sleep(1)
 
 if __name__ == "__main__":
   conn = IoTConn(thingName=iotThingName, iotEndpoint=iotEndpoint, rootCA=rootCA, privateKey=privateKey, certFile=certFile)
   garage = Garage(conn=conn, name=shadowName, switchChannel=switchChannel, relayChannel=relayChannel)
+  garage.init()
   garage.monitor()
 
