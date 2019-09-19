@@ -10,7 +10,7 @@ from datetime import datetime
 
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('iot')
-logger.level = logging.INFO
+logger.setLevel(logging.DEBUG)
 
 load_dotenv()
 
