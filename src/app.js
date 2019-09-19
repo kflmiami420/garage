@@ -21,12 +21,12 @@ exports.handler = async function (event, context) {
   console.log(`namespace is ${namespace}  -  directive name: ${directiveName}`);
 
   switch(namespace) {
-      case 'alexa.authorization': return handleAuth();
-      case 'alexa.discovery': return handleDiscovery();
-      case 'alexa.lockcontroller': return handleLockController(event);
-      case 'alexa':
-          if (directiveName === 'reportstate') return handleReportState(event);
-      default: console.log('Unknown namespamce: ', namespace);
+    case 'alexa.authorization': return handleAuth();
+    case 'alexa.discovery': return handleDiscovery();
+    case 'alexa.lockcontroller': return handleLockController(event);
+    case 'alexa':
+      if (directiveName === 'reportstate') return handleReportState(event);
+    default: console.log('Unknown namespamce: ', namespace);
   }
 };
 
@@ -37,30 +37,30 @@ function handleAuth() {
 }
 
 function handleDiscovery() {
-    const adr = new AlexaResponse({namespace: "Alexa.Discovery", name: "Discover.Response"});
-    const capability_alexa = adr.createPayloadEndpointCapability();
+  const adr = new AlexaResponse({namespace: "Alexa.Discovery", name: "Discover.Response"});
+  const capability_alexa = adr.createPayloadEndpointCapability();
 
-    const lock = adr.createPayloadEndpointCapability({
-      interface: "Alexa.LockController",
-      supported: [{name: "lockState"}],
-      proactivelyReported: true,
-      retrievable: true
-    });
+  const lock = adr.createPayloadEndpointCapability({
+    interface: "Alexa.LockController",
+    supported: [{name: "lockState"}],
+    proactivelyReported: true,
+    retrievable: true
+  });
 
-    const health = adr.createPayloadEndpointCapability({
-      interface: "Alexa.EndpointHealth",
-      supported: [{name: "connectivity"}],
-      proactivelyReported: true,
-      retrievable: true
-    });
+  const health = adr.createPayloadEndpointCapability({
+    interface: "Alexa.EndpointHealth",
+    supported: [{name: "connectivity"}],
+    proactivelyReported: true,
+    retrievable: true
+  });
 
-    adr.addPayloadEndpoint({
-      friendlyName: alexaDeviceName,
-      endpointId: clientId,
-      capabilities: [capability_alexa, lock, health]
-    });
+  adr.addPayloadEndpoint({
+    friendlyName: alexaDeviceName,
+    endpointId: clientId,
+    capabilities: [capability_alexa, lock, health]
+  });
 
-    return adr.get();
+  return adr.get();
 }
 
 async function handleLockController(event) {
@@ -80,16 +80,16 @@ async function handleLockController(event) {
 }
 
 async function handleReportState(event) {
-    const endpointId = event.directive.endpoint.endpointId;
-    const token = event.directive.endpoint.scope.token;
-    const correlationToken = event.directive.header.correlationToken;
+  const endpointId = event.directive.endpoint.endpointId;
+  const token = event.directive.endpoint.scope.token;
+  const correlationToken = event.directive.header.correlationToken;
+  const deviceState = await getDeviceShadowState(thingName);
+  console.log('deviceState ', deviceState);
+  const ar = new AlexaResponse({ correlationToken, token, endpointId, name: "StateReport" });
+  ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: deviceState.toUpperCase()});
 
-    const deviceState = await getDeviceShadowState(thingName);
-
-    const ar = new AlexaResponse({ correlationToken, token, endpointId, name: "StateReport" });
-    ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: stateLockMapping[deviceState]});
-
-    return ar.get();
+  console.log('handle report state ', ar.get());
+  return ar.get();
 }
 
 async function getDeviceShadowState(thingName) {
