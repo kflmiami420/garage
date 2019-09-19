@@ -16,9 +16,7 @@ iotEndpoint = os.environ['IOT_ENDPOINT']
 iotThingName = os.environ['IOT_THING_NAME']
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(relayChannel, GPIO.OUT)
-p = GPIO.PWM(relayChannel, 0.5)
-p.start(1)
+# GPIO.setup(relayChannel, GPIO.OUT)
 
 certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
 rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
@@ -70,11 +68,15 @@ class Garage:
 
   def lock(self):
     print('locking...')
-    GPIO.output(self.relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
+    p = GPIO.PWM(self.relayChannel, 0.5)
+    p.start(1)
+    # GPIO.output(self.relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
 
   def unlock(self):
     print('unlocking...')
-    GPIO.output(self.relayChannel, GPIO.LOW)
+    p = GPIO.PWM(self.relayChannel, 0.5)
+    p.start(1)
+    # GPIO.output(self.relayChannel, GPIO.LOW)
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
