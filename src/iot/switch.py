@@ -92,7 +92,8 @@ class Garage:
 
   def onShadowGet(self, payload, responseStatus, token):
     payload = json.loads(payload)
-    self.previousRealState = payload["reported"]["status"]
+    if "reported" in payload and "status" in payload["reported"]:
+      self.previousRealState = payload["reported"]["status"]
 
   def getShadowState(self):
     self.shadow.shadowGet(self.onShadowGet, 5)
