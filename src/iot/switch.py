@@ -109,8 +109,8 @@ class Garage:
 
   def monitor(self):
     print('monitoring for new state')
-    self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
     self.getShadowState()
+    # self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
 
     while True:
       self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
