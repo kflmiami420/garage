@@ -13,6 +13,8 @@ switchChannel = int(os.environ['SWITCH_CHANNEL'])
 shadowName = os.environ['IOT_CLIENT_ID']
 iotEndpoint = os.environ['IOT_ENDPOINT']
 iotTopicPrefix = os.environ['IOT_TOPIC_PREFIX']
+iotThingName = os.environ['IOT_THING_NAME']
+iotTopic = "{}\{}".format(iotTopicPrefix, iotThingName)
 
 GPIO.setmode(GPIO.BCM)
 currentState = ''
@@ -33,6 +35,15 @@ lockStateMapping = {}
 lockStateMapping[GPIO.HIGH] = "unlocked"
 lockStateMapping[GPIO.LOW] = "locked"
 deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
+
+mqttClient = shadowClient.getMQTTConnection()
+iotTopic = "$aws/things/smart-garage/shadow/update"
+# iotTopic = "$aws/things/smart-garage/shadow/update/accepted"
+mqttClient.subscribe(iotTopic, 1, handleDesiredStateChange)
+
+def handleDesiredStateChange(payload, status, token):
+  print("handleDesiredStateChange", payload, status, token)
+
 
 def shadowUpdateCallback(payload, responseStatus, token):
   print("shadow update status: {}, payload: {}".format(responseStatus, payload))

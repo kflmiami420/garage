@@ -22,6 +22,17 @@ User talk to Alexa: Alexa, lock the garage. This will trigger a smart home lock 
 npm i
 ```
 
+## Enable as service
+
+```shell
+  # modify crontab to start the Python service after reboot
+  crontab -e
+  @reboot cd /home/pi/garage && /home/pi/garage/env/bin/python /home/pi/garage/src/iot/switch.py
+
+  # enable cron
+  systemctl enable cron.service
+```
+
 ## Setup Raspi Zero
 
 ```shell

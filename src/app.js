@@ -7,16 +7,8 @@ const iotdata = new AWS.IotData({endpoint: process.env.IOT_ENDPOINT});
 
 const clientId = process.env.IOT_CLIENT_ID;
 const iotTopic = `${process.env.IOT_TOPIC_PREFIX}\\${clientId}`;
-const iotThingName = process.env.IOT_THING_NAME;
+const thingName = process.env.IOT_THING_NAME;
 const alexaDeviceName = process.env.ALEXA_DEVICE_NAME;
-const stateLockMapping = {
-  'open': 'UNLOCKED',
-  'close': 'LOCKED',
-  'lock': 'close',
-  'unlock': 'open',
-  'LOCKED': 'close',
-  'UNLOCKED': 'open',
-};
 
 exports.handler = async function (event, context) {
   // console.log(JSON.stringify(event));
@@ -68,13 +60,13 @@ function handleDiscovery() {
 }
 
 async function handleLockController(event) {
-  const requestedAction = event.directive.header.name.toLowerCase();
-  const desiredState = stateLockMapping[requestedAction];
+  const desiredState = event.directive.header.name.toLowerCase();
   const endpointId = event.directive.endpoint.endpointId;
   const token = event.directive.endpoint.scope.token;
   const correlationToken = event.directive.header.correlationToken;
 
-  const updateRes = await iotdata.updateThingShadow({payload: {state: desiredState}, thingName}).promise();
+  const payload = JSON.stringify({state: {desired: {status: desiredState}}});
+  const updateRes = await iotdata.updateThingShadow({payload, thingName}).promise();
   console.log('update thing res ', updateRes);
 
   const ar = new AlexaResponse({ correlationToken, token, endpointId });
@@ -82,14 +74,12 @@ async function handleLockController(event) {
 
   // const params = {
   //   topic: iotTopic,
-  //   payload: JSON.stringify({
-  //     newState: desiredState,
-  //     deviceId: clientId
-  //   }),
+  //   payload: JSON.stringify(payload),
   //   qos: 0
   // };
 
-  // await iotdata.publish(params).promise();
+  // const pubRes = await iotdata.publish(params).promise();
+  // console.log('publish topic res ', pubRes);
 
   return ar.get();
 }
@@ -99,7 +89,7 @@ async function handleReportState(event) {
     const token = event.directive.endpoint.scope.token;
     const correlationToken = event.directive.header.correlationToken;
 
-    const deviceState = await getDeviceShadowState(iotThingName);
+    const deviceState = await getDeviceShadowState(thingName);
 
     const ar = new AlexaResponse({ correlationToken, token, endpointId, name: "StateReport" });
     ar.addContextProperty({namespace: "Alexa.LockController", name: "lockState", value: stateLockMapping[deviceState]});
@@ -111,5 +101,5 @@ async function getDeviceShadowState(thingName) {
   let shadowState = await iotdata.getThingShadow({thingName}).promise();
   shadowState = JSON.parse(shadowState.payload);
 
-  return shadowState.state.reported.status; // open | close
+  return shadowState.state.reported.status; // unlocked | locked
 }
