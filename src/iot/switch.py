@@ -16,6 +16,7 @@ iotEndpoint = os.environ['IOT_ENDPOINT']
 iotThingName = os.environ['IOT_THING_NAME']
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+print('relayChannel ', relayChannel)
 GPIO.setup(relayChannel, GPIO.OUT)
 
 certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
@@ -68,11 +69,11 @@ class Garage:
 
   def lock(self):
     print('locking...')
-    GPIO.output(relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
+    GPIO.output(self.relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
 
   def unlock(self):
     print('unlocking...')
-    GPIO.output(relayChannel, GPIO.LOW)
+    GPIO.output(self.relayChannel, GPIO.LOW)
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
@@ -107,7 +108,7 @@ class Garage:
 
   def init(self):
     self.getShadowState()
-    self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
+    self.currentRealState = self.lockStateMapping[GPIO.input(self.switchChannel)]
     if self.currentRealState != self.previousRealState:
       print("init: sync state: {}".format(self.currentRealState))
       self.updateShadow(self.currentRealState)
