@@ -17,8 +17,8 @@ iotThingName = os.environ['IOT_THING_NAME']
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(relayChannel, GPIO.OUT)
-p = GPIO.PWM(relayChannel, 0.5)
-p.start(1)
+# p = GPIO.PWM(relayChannel, 0.5)
+# p.start(1)
 
 certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
 rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
@@ -72,7 +72,7 @@ class Garage:
     print('locking...')
     # p = GPIO.PWM(self.relayChannel, 0.5)
     # p.start(1)
-    GPIO.output(self.relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
+    GPIO.output(self.relayChannel, not GPIO.input(relayChannel))
 
   def unlock(self):
     print('unlocking...')
