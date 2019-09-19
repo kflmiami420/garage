@@ -2,7 +2,7 @@
   "directive": {
       "header": {
           "namespace": "Alexa.LockController",
-          "name": "Unlock",
+          "name": "Lock",
           "payloadVersion": "3",
           "messageId": "fa5c1080-dd59-48f9-b79f-c73190834071",
           "correlationToken": "AAAAAAAAAAAY+b"
