@@ -36,11 +36,15 @@ lockStateMapping[GPIO.LOW] = "locked"
 deviceShadow = shadowClient.createShadowHandlerWithName(iotTopicPrefix, True)
 
 mqttClient = shadowClient.getMQTTConnection()
-iotTopic = "$aws/things/smart-garage/shadow/update"
+iotTopic = "$aws/things/smart-garage/shadow/update/delta"
 # iotTopic = "$aws/things/smart-garage/shadow/update/accepted"
 
-def handleDesiredStateChange(payload, status, token):
-  print("handleDesiredStateChange", payload, status, token)
+def handleDesiredStateChange(client, userdata, message):
+  print("handleDesiredStateChange", client, userdata, message)
+  print(message.payload)
+  print("from topic: ")
+  print(message.topic)
+
 
 def handleShadowUpdateCallback(payload, responseStatus, token):
   print("shadow update status: {}, payload: {}".format(responseStatus, payload))
