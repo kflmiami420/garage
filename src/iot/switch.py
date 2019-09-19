@@ -13,12 +13,10 @@ switchChannel = int(os.environ['SWITCH_CHANNEL'])
 relayChannel = int(os.environ['RELAY_CHANNEL'])
 shadowName = os.environ['IOT_CLIENT_ID']
 iotEndpoint = os.environ['IOT_ENDPOINT']
-iotTopicPrefix = os.environ['IOT_TOPIC_PREFIX']
 iotThingName = os.environ['IOT_THING_NAME']
-# iotTopic = "{}\{}".format(iotTopicPrefix, iotThingName)
-# iotTopic = "$aws/things/smart-garage/shadow/update/delta"
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(relayChannel, GPIO.OUT, pull_up_down=GPIO.PUD_UP)
 
 certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
 rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
@@ -70,9 +68,11 @@ class Garage:
 
   def lock(self):
     print('locking...')
+    GPIO.output(relayChannel, GPIO.HIGH) # not GPIO.input(relayChannel)
 
   def unlock(self):
     print('unlocking...')
+    GPIO.output(relayChannel, GPIO.LOW)
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
@@ -132,4 +132,3 @@ if __name__ == "__main__":
   garage = Garage(conn=conn, name=shadowName, switchChannel=switchChannel, relayChannel=relayChannel)
   garage.init()
   garage.monitor()
-
