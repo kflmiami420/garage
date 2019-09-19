@@ -9,6 +9,8 @@ from pathlib import Path
 from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 load_dotenv()
 
 switchChannel = int(os.environ['SWITCH_CHANNEL'])
@@ -71,25 +73,25 @@ class Garage:
     self.shadow = self.conn.getDeviceShadow()
 
   def lock(self):
-    logging.info('locking...')
+    logger.info('locking...')
 
   def unlock(self):
-    logging.info('unlocking...')
+    logger.info('unlocking...')
 
   def onShadowDelta(self, payload, responseStatus, token):
     payload = json.loads(payload)
     desiredState = payload["state"]["status"]
     if self.currentRealState != desiredState:
-      logging.info("new desired state from shadow delta: {}".format(desiredState))
+      logger.info("new desired state from shadow delta: {}".format(desiredState))
       if desiredState == 'locked': self.lock()
       elif desiredState == 'unlocked': self.unlock()
     else:
-      logging.info("new desired state is the same as current state: {}".format(self.currentRealState))
+      logger.info("new desired state is the same as current state: {}".format(self.currentRealState))
 
   def onShadowUpdate(self, payload, responseStatus, token):
-    # logging.info("shadow update status: {}, payload: {}".format(responseStatus, payload))
+    # logger.info("shadow update status: {}, payload: {}".format(responseStatus, payload))
     if (responseStatus != "accepted"):
-      logging.info("Problem with shadow update: {}".format(responseStatus))
+      logger.info("Problem with shadow update: {}".format(responseStatus))
 
   def onShadowGet(self, payload, responseStatus, token):
     payload = json.loads(payload)
@@ -114,11 +116,11 @@ class Garage:
     self.getShadowState()
     self.currentRealState = self.lockStateMapping[GPIO.input(switchChannel)]
     if self.currentRealState != self.previousRealState:
-      logging.info("init: sync state: {}".format(self.currentRealState))
+      logger.info("init: sync state: {}".format(self.currentRealState))
       self.updateShadow(self.currentRealState)
 
   def monitor(self):
-    logging.info('monitoring for new state')
+    logger.info('monitoring for new state')
 
     # self.shadow.shadowRegisterDeltaCallback(self.onShadowDelta)
 
@@ -127,10 +129,10 @@ class Garage:
       if self.currentRealState != self.previousRealState:
         try:
           self.updateShadow(self.currentRealState)
-          logging.info("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
+          logger.info("switch channel current state: {}, previous state: {}".format(self.currentRealState, self.previousRealState))
           self.previousRealState = self.currentRealState
         except Exception as e:
-          logging.info("Problem updating shadow state", e)
+          logger.info("Problem updating shadow state", e)
       time.sleep(1)
 
 if __name__ == "__main__":
