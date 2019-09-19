@@ -79,16 +79,14 @@ class Garage:
     payload = json.loads(payload)
     desiredState = payload["state"]["status"]
     if self.currentRealState != desiredState:
-      print("new desired state: {}".format(desiredState))
-
+      print("new desired state from shadow delta: {}".format(desiredState))
       if desiredState == 'locked': self.lock()
       elif desiredState == 'unlocked': self.unlock()
-
     else:
       print("new desired state is the same as current state: {}".format(self.currentRealState))
 
   def onShadowUpdate(self, payload, responseStatus, token):
-    print("shadow update status: {}, payload: {}".format(responseStatus, payload))
+    # print("shadow update status: {}, payload: {}".format(responseStatus, payload))
     if (responseStatus != "accepted"):
       print("Problem with shadow update: {}".format(responseStatus))
 
