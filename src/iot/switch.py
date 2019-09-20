@@ -18,6 +18,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 GPIO.setup(switchChannel, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(relayChannel, GPIO.OUT)
+GPIO.output(relayChannel, GPIO.HIGH)
 
 certsPath = Path.cwd().joinpath('src', 'iot', 'certs')
 rootCA = str(certsPath.joinpath("AmazonRootCA1.pem"))
