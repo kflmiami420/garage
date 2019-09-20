@@ -61,8 +61,8 @@ class Garage:
     self.switchChannel = switchChannel
     self.relayChannel = relayChannel
     self.lockStateMapping = {}
-    self.lockStateMapping[GPIO.HIGH] = "unlocked"
-    self.lockStateMapping[GPIO.LOW] = "locked"
+    self.lockStateMapping[GPIO.HIGH] = "locked"
+    self.lockStateMapping[GPIO.LOW] = "unlocked"
     self.conn = conn
     self.conn.connect()
     self.mqtt = self.conn.getMQTT()
